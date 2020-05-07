@@ -1,19 +1,7 @@
+// Объявление переменных
 const cartButton = document.querySelector("#cart-button");
 const modal = document.querySelector(".modal");
 const close = document.querySelector(".close");
-
-cartButton.addEventListener("click", toggleModal);
-close.addEventListener("click", toggleModal);
-
-function toggleModal() {
-  modal.classList.toggle("is-open");
-}
-
-
-// day one 
-
-
-// Объявление переменных
 const buttonAuth = document.querySelector('.button-auth');
 const modalAuth = document.querySelector('.modal-auth');
 const closeAuth = document.querySelector('.close-auth');
@@ -21,8 +9,22 @@ const logInForm = document.querySelector('#logInForm');
 const loginInput = document.querySelector('#login');
 const userName = document.querySelector('.user-name');
 const buttonOut = document.querySelector('.button-out');
+const cardsRestaurants = document.querySelector('.cards-restaurants');
+const conteinerPromo = document.querySelector('.container-promo');
+const restaurants = document.querySelector('.restaurants');
+const menu = document.querySelector('.menu');
+const logo = document.querySelector('.logo');
+const cardsMenu = document.querySelector('.cards-menu');
+
 
 let login = localStorage.getItem('gloDelivery'); // Записывает значение из localStorage в переменную для хранения логина
+
+
+// day one 
+
+function toggleModal() {
+  modal.classList.toggle("is-open");
+}
 
 // Функция 'toogleModalAuth' навешивает метод 'toggle', который добавляет или убирает клас 'is-open'
 function toogleModalAuth() {                            
@@ -103,3 +105,101 @@ function checkAuth() {
 
 
 checkAuth() // Функцию необходимо хотя бы один раз вызвать, чтобы она работала в 'logIn' (хрен пойми, почему так)
+
+// day two
+
+function createCardRestaurant() {
+  // Записываем верстку карточки в переменную
+  const card = `
+      <a class="card card-restaurant">
+        <img src="img/palki-skalki/preview.jpg" alt="image" class="card-image"/>
+        <div class="card-text">
+          <div class="card-heading">
+            <h3 class="card-title">Палки скалки</h3>
+            <span class="card-tag tag">55 мин</span>
+          </div>
+          <div class="card-info">
+            <div class="rating">
+              4.5
+            </div>
+            <div class="price">От 500 ₽</div>
+            <div class="category">Пицца</div>
+          </div>
+        </div>
+      </a>
+  `;
+
+  cardsRestaurants.insertAdjacentHTML('beforeend', card); // Вставляем HTML код, который записан в переменную Card с помощью метода insertAdjacentHTML 
+  
+}
+
+ //Вызов функции добавляет элемент 'ресторан' на страницу
+createCardRestaurant();
+createCardRestaurant();
+createCardRestaurant();
+
+// Функция createCardGoods создает элемент меню и добавляет его на страницу
+function createCardGoods() {
+  const card = document.createElement('div'); // Создает элемент div на странице 
+  card.className = 'card'; // Добавляет класс 'card' элементу, созданному с помошью метода createElement выше
+  // Вставляем верстку в созданный элементы 
+  card.insertAdjacentHTML('afterbegin', `
+            <img src="img/pizza-plus/pizza-vesuvius.jpg" alt="image" class="card-image"/>
+            <div class="card-text">
+              <div class="card-heading">
+                <h3 class="card-title card-title-reg">Пицца Везувий</h3>
+              </div>
+              <div class="card-info">
+                <div class="ingredients">Соус томатный, сыр «Моцарелла», ветчина, пепперони, перец
+                  «Халапенье», соус «Тобаско», томаты.
+                </div>
+              </div>
+              <div class="card-buttons">
+                <button class="button button-primary button-add-cart">
+                  <span class="button-card-text">В корзину</span>
+                  <span class="button-cart-svg"></span>
+                </button>
+                <strong class="card-price-bold">545 ₽</strong>
+              </div>
+            </div>
+      `);
+
+  cardsMenu.insertAdjacentElement('beforeend' ,card); // добавляет элемент card на страницу
+};
+
+
+
+// event - это объект-события, который создается во время события, допустим, клика 
+function openGoods(event) {
+  const target = event.target; // Свойство target объекта event определяет на каком элементе произошло событие. Допустим, на какой элемент верстки кликнул пользователь: div, img, span и т.д.
+  const restaurant = target.closest('.card-restaurant'); // Метод closest поднимается выше во вложенности пока не найдет эдемент с заданных селектором 
+  
+  // Так-как при нажатии мимо блока .card-restaurant мы получаем hull, то можно написать условие, которое будет проверять наличие restaurant после собития клика 
+  if (restaurant) {
+    cardsMenu.textContent = ''; // очищает блок с классом card-menu от ненужного дублирующегося контента (хотя у меня ничего не дублировалось)
+    conteinerPromo.classList.add('hide'); // Добавляем класс hide блоку, записанному в переменную, чтобы скрыть его при условии
+    restaurants.classList.add('hide'); // Добавляем класс hide блоку, записанному в переменную, чтобы скрыть его при условии
+    menu.classList.remove('hide'); // Удаляем класс hide блоку, записанному в переменную, чтобы отобразить его при условии
+
+    // Вызов функции, которая создает элемент div с классом card и версткой карточки внутри и добавляет его на страницу
+    createCardGoods();
+    createCardGoods();
+    createCardGoods();
+  }
+}
+
+
+
+cardsRestaurants.addEventListener('click', openGoods); // При клике на cardsRestaurants запускается функция openGoods
+// это действие возвращает обратно скрытые функцией openGoods элементы 
+
+// Функцию можно записывать прямо внутри метода addEventListener - удобства ;) 
+logo.addEventListener('click', function () {
+  conteinerPromo.classList.remove('hide');
+  restaurants.classList.remove('hide');
+  menu.classList.add('hide');
+});
+
+cartButton.addEventListener("click", toggleModal);
+
+close.addEventListener("click", toggleModal);
