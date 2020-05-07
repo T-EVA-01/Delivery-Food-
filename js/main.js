@@ -22,6 +22,8 @@ let login = localStorage.getItem('gloDelivery'); // Записывает зна�
 
 // day one 
 
+// ФУНКЦИИ
+
 function toggleModal() {
   modal.classList.toggle("is-open");
 }
@@ -37,7 +39,6 @@ function toogleModalAuth() {
    classList.remove - удаляет класс
 */ 
 
-console.log(login);
 
 function autorized() {
   // Функция logOut записывает в переменную login пустую строку, проверяет авторизацию с помощью checkAuth(), и возвращает исходные сss значения для кнопки 'Выйти', 
@@ -104,8 +105,6 @@ function checkAuth() {
 }
 
 
-checkAuth() // Функцию необходимо хотя бы один раз вызвать, чтобы она работала в 'logIn' (хрен пойми, почему так)
-
 // day two
 
 function createCardRestaurant() {
@@ -132,11 +131,6 @@ function createCardRestaurant() {
   cardsRestaurants.insertAdjacentHTML('beforeend', card); // Вставляем HTML код, который записан в переменную Card с помощью метода insertAdjacentHTML 
   
 }
-
- //Вызов функции добавляет элемент 'ресторан' на страницу
-createCardRestaurant();
-createCardRestaurant();
-createCardRestaurant();
 
 // Функция createCardGoods создает элемент меню и добавляет его на страницу
 function createCardGoods() {
@@ -189,6 +183,7 @@ function openGoods(event) {
 }
 
 
+// ОБРАБОТЧИКИ СОБЫТИЙ
 
 cardsRestaurants.addEventListener('click', openGoods); // При клике на cardsRestaurants запускается функция openGoods
 // это действие возвращает обратно скрытые функцией openGoods элементы 
@@ -203,3 +198,12 @@ logo.addEventListener('click', function () {
 cartButton.addEventListener("click", toggleModal);
 
 close.addEventListener("click", toggleModal);
+
+// ВЫЗОВЫ ФУНКЦИЙ
+
+checkAuth() // Функцию необходимо хотя бы один раз вызвать, чтобы она работала в 'logIn' (хрен пойми, почему так)
+
+ //Вызов функции добавляет элемент 'ресторан' на страницу
+ createCardRestaurant();
+ createCardRestaurant();
+ createCardRestaurant();
