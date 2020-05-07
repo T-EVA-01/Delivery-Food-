@@ -46,7 +46,7 @@ function autorized() {
     buttonAuth.style.display = '';
     userName.style.display = '';
     buttonOut.style.display = '';
-    buttonOut.removeEventListener('click', logOut); //Удаляем событие, чтобы оно не навещивалось многократно 
+    buttonOut.removeEventListener('click', logOut); //Удаляем событие, чтобы оно не навешивалось многократно 
 
     checkAuth();
   }
