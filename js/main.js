@@ -23,9 +23,19 @@ const cardsMenu = document.querySelector('.cards-menu');
 let login = localStorage.getItem('gloDelivery'); // Записывает значение из localStorage в переменную для хранения логина
 
 
-// day one 
-
 // ФУНКЦИИ
+// Функция, осуществляющая запрос к json-файлу 
+// async - делает функцию асинхронной, т.е. на время выполнения запроса работа сайта не останавливается  
+// К подобной функции, записанной в переменную, нельзя обратиться до их объявления
+const getData = async function(url) {
+  const response = await fetch(url) //fetch делает запрос
+
+  if(!response.ok) {
+    throw new Error(`Ошибка по адресу ${url}, статус ошибки ${responce.status}!`); //throw - создаёт ощибку, которую можно описать самому
+  };
+
+  return await response.json(); //Возвращает данные json в место вызова функции 
+}
 
 // Функция валидации с использованием регулярного выражения
 const valid = function(str) {
@@ -115,24 +125,31 @@ function checkAuth() {
 }
 
 
-// day two
+function createCardRestaurant(restaurant) {
 
-function createCardRestaurant() {
+  const { image, 
+          kitchen, 
+          name, 
+          price, 
+          stars, 
+          products, 
+          time_of_delivery: timeOfDelivery } = restaurant;//Деструктуризация. В результате получаем переменные с этими именами, данные для которых буруться из json 
+
   // Записываем верстку карточки в переменную
   const card = `
-      <a class="card card-restaurant">
-        <img src="img/palki-skalki/preview.jpg" alt="image" class="card-image"/>
+      <a class="card card-restaurant" data-products="${products}">
+        <img src="${image}" alt="image" class="card-image"/>
         <div class="card-text">
           <div class="card-heading">
-            <h3 class="card-title">Палки скалки</h3>
-            <span class="card-tag tag">55 мин</span>
+            <h3 class="card-title">${name}</h3>
+            <span class="card-tag tag">${timeOfDelivery}</span>
           </div>
           <div class="card-info">
             <div class="rating">
-              4.5
+              ${stars}
             </div>
-            <div class="price">От 500 ₽</div>
-            <div class="category">Пицца</div>
+            <div class="price">От ${price} ₽</div>
+            <div class="category">${kitchen}</div>
           </div>
         </div>
       </a>
@@ -143,19 +160,19 @@ function createCardRestaurant() {
 }
 
 // Функция createCardGoods создает элемент меню и добавляет его на страницу
-function createCardGoods() {
+function createCardGoods({ description, id, image, name, price }) {
+
   const card = document.createElement('div'); // Создает элемент div на странице 
   card.className = 'card'; // Добавляет класс 'card' элементу, созданному с помошью метода createElement выше
   // Вставляем верстку в созданный элементы 
   card.insertAdjacentHTML('afterbegin', `
-            <img src="img/pizza-plus/pizza-vesuvius.jpg" alt="image" class="card-image"/>
+            <img src="${image}" alt="image" class="card-image"/>
             <div class="card-text">
               <div class="card-heading">
-                <h3 class="card-title card-title-reg">Пицца Везувий</h3>
+                <h3 class="card-title card-title-reg">${name}</h3>
               </div>
               <div class="card-info">
-                <div class="ingredients">Соус томатный, сыр «Моцарелла», ветчина, пепперони, перец
-                  «Халапенье», соус «Тобаско», томаты.
+                <div class="ingredients">${description}
                 </div>
               </div>
               <div class="card-buttons">
@@ -163,7 +180,7 @@ function createCardGoods() {
                   <span class="button-card-text">В корзину</span>
                   <span class="button-cart-svg"></span>
                 </button>
-                <strong class="card-price-bold">545 ₽</strong>
+                <strong class="card-price-bold">${price} ₽</strong>
               </div>
             </div>
       `);
@@ -183,53 +200,64 @@ function openGoods(event) {
   // Условие сначала проверяющее булевое значение переменной 'restaurant', затем проверяет логин
   if (restaurant) {
     if(login) {
+
+      
+
       cardsMenu.textContent = ''; // очищает блок с классом card-menu от ненужного дублирующегося контента (хотя у меня ничего не дублировалось)
       conteinerPromo.classList.add('hide'); // Добавляем класс hide блоку, записанному в переменную, чтобы скрыть его при условии
       restaurants.classList.add('hide'); // Добавляем класс hide блоку, записанному в переменную, чтобы скрыть его при условии
       menu.classList.remove('hide'); // Удаляем класс hide блоку, записанному в переменную, чтобы отобразить его при условии
-   
-      // Вызов функции, которая создает элемент div с классом card и версткой карточки внутри и добавляет его на страницу
-      createCardGoods();
-      createCardGoods();
-      createCardGoods();
+      getData(`./db/${restaurant.dataset.products}`).then(function(data) {
+        console.log(data);
+        data.forEach(createCardGoods);
+      });
+
+
+
     } else {
+      // Вызов функции, которая создает элемент div с классом card и версткой карточки внутри и добавляет его на страницу
       toogleModalAuth();
-    }
+    };
 
 
-  }
-}
+  };
+};
+
 
 
 // ОБРАБОТЧИКИ СОБЫТИЙ
 
-cardsRestaurants.addEventListener('click', openGoods); // При клике на cardsRestaurants запускается функция openGoods
-// это действие возвращает обратно скрытые функцией openGoods элементы 
+function init() {
 
-// Функцию можно записывать прямо внутри метода addEventListener - удобства ;) 
-logo.addEventListener('click', function () {
-  conteinerPromo.classList.remove('hide');
-  restaurants.classList.remove('hide');
-  menu.classList.add('hide');
-});
+    //Вызываем функцию и спомощью метода then зададим call-back функцию, которая сработает после того, как сработает getData (метод обработки Promis-ов)
+    getData(`./db/partners.json`).then(function(data) {
+      console.log(data);
+      data.forEach(createCardRestaurant);
+    });
 
-cartButton.addEventListener("click", toggleModal);
+    cardsRestaurants.addEventListener('click', openGoods); // При клике на cardsRestaurants запускается функция openGoods
+    // это действие возвращает обратно скрытые функцией openGoods элементы 
 
-close.addEventListener("click", toggleModal);
+    // Функцию можно записывать прямо внутри метода addEventListener - удобства ;) 
+    logo.addEventListener('click', function () {
+      conteinerPromo.classList.remove('hide');
+      restaurants.classList.remove('hide');
+      menu.classList.add('hide');
+    });
 
-// ВЫЗОВЫ ФУНКЦИЙ
+    cartButton.addEventListener("click", toggleModal);
 
-checkAuth() // Функцию необходимо хотя бы один раз вызвать, чтобы она работала в 'logIn' (хрен пойми, почему так)
+    close.addEventListener("click", toggleModal);
 
- //Вызов функции добавляет элемент 'ресторан' на страницу
- createCardRestaurant();
- createCardRestaurant();
- createCardRestaurant();
+    checkAuth() // Функцию необходимо хотя бы один раз вызвать, чтобы она работала в 'logIn' (хрен пойми, почему так)
 
- new Swiper('.swiper-container', {
-   loop: true,   //Настройка бесконечного прокручивания
-   autoplay: { 
-     delay: 10000,
-   },  // Автоматическй запуск свайпера 
-   // Здесь перечисляются настройки свайпера, полный перечень на сайте swiper-slider в разделе API
-}); //инициализация свайпера 
+    new Swiper('.swiper-container', {
+      loop: true,   //Настройка бесконечного прокручивания
+      autoplay: { 
+        delay: 10000,
+      },  // Автоматическй запуск свайпера 
+      // Здесь перечисляются настройки свайпера, полный перечень на сайте swiper-slider в разделе API
+    }); //инициализация свайпера 
+  };
+
+  init();
