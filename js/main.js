@@ -22,13 +22,18 @@ const restaurantTitle = document.querySelector('.restaurant-title');
 const rating = document.querySelector('.rating');
 const minPrice = document.querySelector('.price');
 const category = document.querySelector('.category');
+const modalBody = document.querySelector('.modal-body');
+const modalPrice = document.querySelector('.modal-pricetag');
+const buttonClearCart = document.querySelector('.clear-cart')
 
 
 
 let login = localStorage.getItem('gloDelivery'); // Записывает значение из localStorage в переменную для хранения логина
 
-
+const cart = [];
 // ФУНКЦИИ
+
+
 // Функция, осуществляющая запрос к json-файлу 
 // async - делает функцию асинхронной, т.е. на время выполнения запроса работа сайта не останавливается  
 // К подобной функции, записанной в переменную, нельзя обратиться до их объявления
@@ -73,6 +78,7 @@ function autorized() {
     buttonAuth.style.display = '';
     userName.style.display = '';
     buttonOut.style.display = '';
+    cartButton.style.display = '';
     buttonOut.removeEventListener('click', logOut); //Удаляем событие, чтобы оно не навешивалось многократно 
 
     checkAuth();
@@ -82,10 +88,10 @@ function autorized() {
   console.log('Авторилован');
 
   userName.textContent = login; // Добавляет в изначально скрытый блок текст, который ввели в поле для логина
-
+  cartButton.style.display = 'flex'; //Отображает кнопку корзины при авторизации
   buttonAuth.style.display = "none"; // Скрывает кнопку 'Войти'
   userName.style.display = 'inline'; // Отображает на странице в виде inline-блока span, в который записавыется введенный пользователем логин
-  buttonOut.style.display = 'block'; // заменяет значение display: none у button-out на block, чтобы отобразить кнопку 'Выйти'
+  buttonOut.style.display = 'flex'; // заменяет значение display: none у button-out на block, чтобы отобразить кнопку 'Выйти'
   buttonOut.addEventListener('click', logOut); // На кнопку "Выйти" навешиваем событие по клику, которое запускает функцию logOut
 };
 
@@ -181,11 +187,11 @@ function createCardGoods({ description, id, image, name, price }) {
                 </div>
               </div>
               <div class="card-buttons">
-                <button class="button button-primary button-add-cart">
+                <button class="button button-primary button-add-cart" id="${id}">
                   <span class="button-card-text">В корзину</span>
                   <span class="button-cart-svg"></span>
                 </button>
-                <strong class="card-price-bold">${price} ₽</strong>
+                <strong class="card-price">${price} ₽</strong>
               </div>
             </div>
       `);
@@ -237,7 +243,84 @@ function openGoods(event) {
   };
 };
 
+function addToCart(event) {
 
+  const target = event.target;
+
+  const buttonAddToCart = target.closest('.button-add-cart'); // Ограничевает поле действия собития, которое висит нак кнопке "В корзину", габаритами самой кнопки
+  
+  if (buttonAddToCart) { 
+    const card = target.closest('.card'); // Получаем саму карточку
+    const title = card.querySelector('.card-title-reg').textContent; // Ищем необходимые элементы внутри карточки, чтобы передать их в корзину
+    const cost = card.querySelector('.card-price').textContent; // Ищем необходимые элементы внутри карточки, чтобы передать их в корзину
+    const id = buttonAddToCart.id; // Получаем уникальный id (id хранятся в json) у кнопок
+
+    const food = cart.find(function(item) {
+      return item.id === id;
+    })
+
+
+    //Условие, которое следит, чтобы один и тот же тип товара не добавлялся в корзину дважды. Вместо этого увеличивается счетчик.
+    if(food) {
+      food.count += 1;
+    } else { 
+      cart.push({
+        id, //Современный синтаксис, тоже, что и id: id, создает свойство id со значением переменной id
+        title, //Современный синтаксис
+        cost, //Современный синтаксис
+        count: 1 //добавляем один товар
+      }); // Добавляем объект внутрь массива cart
+    };
+  };
+};
+
+function renderCart() {
+  modalBody.textContent = ''; // Очищаем корзину
+  cart.forEach(function({ id, title, cost, count }) {
+    // Формируем верстку элемента корзины
+    const itemCart = `				
+    <div class="food-row">
+      <span class="food-name">${title}</span>
+      <strong class="food-price">${cost}</strong>
+      <div class="food-counter">
+        <button class="counter-button counter-minus" data-id=${id}>-</button>
+        <span class="counter">${count}</span>
+        <button class="counter-button counter-plus" data-id=${id}>+</button>
+      </div>
+    </div>`;
+
+    modalBody.insertAdjacentHTML('afterbegin', itemCart); // Добавляем HTML-код в начало списка заказов в корзине
+  });
+
+
+  // Суммирует цену товаров в корзине с помощью метода reduce, который возвращает результат предыдущего вызова функции (первый параметр)
+  const totalPrice = cart.reduce(function(result, item) {
+    return result + (parseFloat(item.cost) * item.count); // Функция parseFloat игнорирует всё кроме чисел и точек и возвращает числовое значение. itemm.count - колличество элементов
+  }, 0); // При первой итерации, когда result неоткуда брать, приметься второй параметр метода reduce, а именно 0.
+
+  // Выводим общую сумму 
+  modalPrice.textContent = totalPrice + ' ₽';
+
+};
+
+// Функция плюс-минус счетчика товара в корзине 
+function changeCount(event) {
+  const target = event.target;
+
+  if (target.classList.contains('counter-button')) {
+    const food = cart.find(function(item) {
+      return item.id === target.dataset.id;
+    });
+    if(target.classList.contains('counter-minus')) {
+      food.count--
+      if(food.count === 0) {
+        cart.splice(cart.indexOf(food), 1)
+      }
+    };
+    if(target.classList.contains('counter-plus')) food.count++;
+    renderCart();
+  };
+};
 
 // ОБРАБОТЧИКИ СОБЫТИЙ
 
@@ -259,7 +342,20 @@ function init() {
       menu.classList.add('hide');
     });
 
-    cartButton.addEventListener("click", toggleModal);
+    modalBody.addEventListener('click', changeCount) // Меняет счетчик товара в корзине
+
+    cardsMenu.addEventListener('click', addToCart) //Обработчик события внутри карточек товара
+
+    cartButton.addEventListener("click", function(){
+      renderCart();
+      toggleModal();
+    });
+
+    // Очищает корзину по нажатию на кнопку "Отмена" в модальном окне
+    buttonClearCart.addEventListener('click', function() {
+      cart.length = 0;
+      renderCart();
+    });
 
     close.addEventListener("click", toggleModal);
 
