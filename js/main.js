@@ -18,6 +18,11 @@ const restaurants = document.querySelector('.restaurants');
 const menu = document.querySelector('.menu');
 const logo = document.querySelector('.logo');
 const cardsMenu = document.querySelector('.cards-menu');
+const restaurantTitle = document.querySelector('.restaurant-title');
+const rating = document.querySelector('.rating');
+const minPrice = document.querySelector('.price');
+const category = document.querySelector('.category');
+
 
 
 let login = localStorage.getItem('gloDelivery'); // Записывает значение из localStorage в переменную для хранения логина
@@ -137,7 +142,7 @@ function createCardRestaurant(restaurant) {
 
   // Записываем верстку карточки в переменную
   const card = `
-      <a class="card card-restaurant" data-products="${products}">
+      <a class="card card-restaurant" data-products="${products}" data-info="${[name, price, stars, kitchen]}">
         <img src="${image}" alt="image" class="card-image"/>
         <div class="card-text">
           <div class="card-heading">
@@ -193,20 +198,29 @@ function createCardGoods({ description, id, image, name, price }) {
 // event - это объект-события, который создается во время события, допустим, клика 
 function openGoods(event) {
   const target = event.target; // Свойство target объекта event определяет на каком элементе произошло событие. Допустим, на какой элемент верстки кликнул пользователь: div, img, span и т.д.
-  const restaurant = target.closest('.card-restaurant'); // Метод closest поднимается выше во вложенности пока не найдет эдемент с заданных селектором 
   
   
   // Так-как при нажатии мимо блока .card-restaurant мы получаем hull, то можно написать условие, которое будет проверять наличие restaurant после собития клика 
   // Условие сначала проверяющее булевое значение переменной 'restaurant', затем проверяет логин
-  if (restaurant) {
-    if(login) {
+  if (login) {
+    const restaurant = target.closest('.card-restaurant'); // Метод closest поднимается выше во вложенности пока не найдет эдемент с заданных селектором 
 
-      
+    if(restaurant) {
+
+      const info = restaurant.dataset.info.split(',');
+
+      const [ name, price, stars, kitchen ] = info;
 
       cardsMenu.textContent = ''; // очищает блок с классом card-menu от ненужного дублирующегося контента (хотя у меня ничего не дублировалось)
       conteinerPromo.classList.add('hide'); // Добавляем класс hide блоку, записанному в переменную, чтобы скрыть его при условии
       restaurants.classList.add('hide'); // Добавляем класс hide блоку, записанному в переменную, чтобы скрыть его при условии
       menu.classList.remove('hide'); // Удаляем класс hide блоку, записанному в переменную, чтобы отобразить его при условии
+      
+      restaurantTitle.textContent = name;
+      rating.textContent = stars;
+      minPrice.textContent = `От ${price} ₽`;
+      category.textContent = kitchen;
+      
       getData(`./db/${restaurant.dataset.products}`).then(function(data) {
         console.log(data);
         data.forEach(createCardGoods);
