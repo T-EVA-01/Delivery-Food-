@@ -43,7 +43,7 @@ const loadCart = function() {
     }
   }
 
-  
+
 const saveCart = function() {
     localStorage.setItem(login, JSON.stringify(cart));
 }
@@ -380,12 +380,24 @@ function init() {
     checkAuth() // Функцию необходимо хотя бы один раз вызвать, чтобы она работала в 'logIn' (хрен пойми, почему так)
 
     new Swiper('.swiper-container', {
+      speed: 1000,
+      effect: "cube",
       loop: true,   //Настройка бесконечного прокручивания
+      cubeEffect: {
+        shadow:  false,
+      },
+      navigation: {
+        nextEl: '.swiper-button-next',
+        prevEl: '.swiper-button-prev',
+      },
       autoplay: { 
-        delay: 10000,
+        delay: 2000,
       },  // Автоматическй запуск свайпера 
       // Здесь перечисляются настройки свайпера, полный перечень на сайте swiper-slider в разделе API
     }); //инициализация свайпера 
   };
+
+  var mySwiper = document.querySelector('.swiper-container');
+  console.log('mySwiper: ', mySwiper);
 
   init();
