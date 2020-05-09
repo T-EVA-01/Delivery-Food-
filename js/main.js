@@ -30,9 +30,23 @@ const buttonClearCart = document.querySelector('.clear-cart')
 
 let login = localStorage.getItem('gloDelivery'); // Записывает значение из localStorage в переменную для хранения логина
 
+// Корзина
 const cart = [];
 // ФУНКЦИИ
 
+// Функция, привязывающая товары в корзине к логину 
+const loadCart = function() {
+    if(localStorage.getItem(login)) {
+      JSON.parse(localStorage.getItem(login)).forEach(function(item) {
+          cart.push(item);
+      })
+    }
+  }
+
+  
+const saveCart = function() {
+    localStorage.setItem(login, JSON.stringify(cart));
+}
 
 // Функция, осуществляющая запрос к json-файлу 
 // async - делает функцию асинхронной, т.е. на время выполнения запроса работа сайта не останавливается  
@@ -83,6 +97,7 @@ function autorized() {
 
     checkAuth();
     // returnMain();
+    cart.length = 0;
   }
 
   console.log('Авторилован');
@@ -93,6 +108,7 @@ function autorized() {
   userName.style.display = 'inline'; // Отображает на странице в виде inline-блока span, в который записавыется введенный пользователем логин
   buttonOut.style.display = 'flex'; // заменяет значение display: none у button-out на block, чтобы отобразить кнопку 'Выйти'
   buttonOut.addEventListener('click', logOut); // На кнопку "Выйти" навешиваем событие по клику, которое запускает функцию logOut
+  loadCart();
 };
 
 function notAuthorized() {
@@ -272,6 +288,7 @@ function addToCart(event) {
       }); // Добавляем объект внутрь массива cart
     };
   };
+  saveCart();
 };
 
 function renderCart() {
@@ -320,6 +337,7 @@ function changeCount(event) {
     if(target.classList.contains('counter-plus')) food.count++;
     renderCart();
   };
+  saveCart();
 };
 
 // ОБРАБОТЧИКИ СОБЫТИЙ
